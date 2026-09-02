@@ -5,9 +5,18 @@
 
 int main()
 {
-BigInt a = -23;
-BigInt b = 0;
-BigInt c = 1000;
+    BigInt original = -3;
+    BigInt shifted = original << 2;
 
-std::cout << a << '\n' << b << '\n' << c << '\n';
+    std::cout << original << '\n';
+    std::cout << shifted << '\n';
+
+    try
+    {
+        std::cout << (original << -1) << '\n';
+    }
+    catch (const std::invalid_argument &error)
+    {
+        std::cout << error.what() << '\n';
+    }
 }

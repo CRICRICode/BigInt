@@ -39,6 +39,9 @@ public:
     bool operator<(const BigInt &other) const;
     bool operator<=(const BigInt &other) const;
 
+    BigInt& operator<<=(int count);
+    BigInt operator<<(int count) const;
+
     void Print() const;
     friend std::ostream &operator<<(std::ostream &out, const BigInt &value);
 
@@ -60,3 +63,4 @@ private:
 };
 
 BigInt pow(const BigInt &base, int exponent);
+BigInt pow(const BigInt &base, BigInt exponent);

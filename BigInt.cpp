@@ -294,14 +294,20 @@ BigInt BigInt::operator%(const BigInt &other) const
 
 BigInt pow(const BigInt &base, int exponent)
 {
+    return pow(base, BigInt(exponent));
+}
+
+BigInt pow(const BigInt &base, BigInt exponent)
+{
     if (exponent < 0)
     {
         throw std::invalid_argument("BigInt: input all'esponente non valido");
     }
     BigInt result = 1;
-    for (int i = 0; i < exponent; i++)
+    while (exponent > 0)
     {
         result *= base;
+        exponent--;
     }
     return result;
 }
@@ -350,6 +356,29 @@ bool BigInt::operator<(const BigInt &other) const
 bool BigInt::operator<=(const BigInt &other) const
 {
     return !(*this > other);
+}
+
+BigInt &BigInt::operator<<=(int count)
+{
+    if (count < 0)
+    {
+        throw std::invalid_argument("BigInt: input inserito non valido");
+    }
+    if (count == 0)
+    {
+        return *this;
+    }
+    for (int i = 0; i < count; i++)
+    {
+        *this *= 2;
+    }
+    return *this;
+}
+
+BigInt BigInt::operator<<(int count) const{
+    BigInt result = *this;
+    result<<=count;
+    return result;
 }
 
 void BigInt::Print() const
