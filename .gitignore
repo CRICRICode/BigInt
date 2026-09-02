@@ -1,0 +1,18 @@
+# Build artifacts
+BigInt
+main
+*.o
+*.obj
+*.exe
+*.out
+*.dSYM/
+build/
+cmake-build-*/
+
+# IDE settings
+.vscode/
+.idea/
+
+# Temporary files
+tempCodeRunnerFile.cpp
+.DS_Store
