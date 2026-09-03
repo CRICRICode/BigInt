@@ -39,8 +39,11 @@ public:
     bool operator<(const BigInt &other) const;
     bool operator<=(const BigInt &other) const;
 
-    BigInt& operator<<=(int count);
+    BigInt &operator<<=(int count);
     BigInt operator<<(int count) const;
+
+    BigInt &operator&=(const BigInt &other);
+    BigInt operator&(const BigInt &other) const;
 
     void Print() const;
     friend std::ostream &operator<<(std::ostream &out, const BigInt &value);
@@ -52,6 +55,12 @@ private:
     void Normalize();
     void SubtractMagnitude(const BigInt &other);
     bool IsZero() const;
+
+    std::vector<int> ToBits() const;
+    std::vector<int> ToTwosComplement(std::size_t width) const;
+    static BigInt FromTwosComplement(const std::vector<int> &bits);
+    static void AddOneToBits(std::vector<int> &bits);
+    static BigInt FromBits(const std::vector<int> &bits);
 
     enum class MagnitudeComparison
     {

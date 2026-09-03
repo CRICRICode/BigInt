@@ -375,9 +375,62 @@ BigInt &BigInt::operator<<=(int count)
     return *this;
 }
 
-BigInt BigInt::operator<<(int count) const{
+BigInt BigInt::operator<<(int count) const
+{
     BigInt result = *this;
-    result<<=count;
+    result <<= count;
+    return result;
+}
+
+std::ostream &operator<<(std::ostream &out, const BigInt &value)
+{
+    if (value.negative)
+    {
+        out << "-";
+    }
+    for (std::size_t i = value.digits.size(); i > 0; --i)
+    {
+        out << value.digits.at(i - 1);
+    }
+    return out;
+}
+
+BigInt &BigInt::operator&=(const BigInt &other)
+{
+    BigInt leftPositive = *this;
+    if (leftPositive.negative)
+    {
+        leftPositive = -leftPositive;
+    }
+
+    BigInt rightPositive = other;
+    if (rightPositive.negative)
+    {
+        rightPositive = -rightPositive;
+    }
+
+    std::size_t leftBits = leftPositive.ToBits().size();
+    std::size_t rightBits = rightPositive.ToBits().size();
+    std::size_t maxSize = (leftBits > rightBits ? leftBits : rightBits) + 1;
+
+    std::vector<int> leftNumber = this->ToTwosComplement(maxSize);
+    std::vector<int> rightNumber = other.ToTwosComplement(maxSize);
+    std::vector<int> result(maxSize);
+
+
+    for (std::size_t i = 0; i < maxSize; i++)
+    {
+        result.at(i) = leftNumber.at(i) & rightNumber.at(i);
+    }
+
+    *this = FromTwosComplement(result);
+    return *this;
+}
+
+BigInt BigInt::operator&(const BigInt &other) const
+{
+    BigInt result = *this;
+    result &= other;
     return result;
 }
 
@@ -395,17 +448,17 @@ void BigInt::Print() const
     std::cout << std::endl;
 }
 
-std::ostream &operator<<(std::ostream &out, const BigInt &value)
+BigInt BigInt::FromBits(const std::vector<int> &bits)
 {
-    if (value.negative)
+    BigInt result = 0;
+
+    for (std::size_t i = bits.size(); i > 0; --i)
     {
-        out << "-";
+        result *= 2;
+        result += bits.at(i - 1);
     }
-    for (std::size_t i = value.digits.size(); i > 0; --i)
-    {
-        out << value.digits.at(i - 1);
-    }
-    return out;
+
+    return result;
 }
 
 // Private
@@ -488,4 +541,103 @@ BigInt::MagnitudeComparison BigInt::CompareMagnitude(const BigInt &other) const
         }
     }
     return MagnitudeComparison::EQUAL;
+}
+
+std::vector<int> BigInt::ToBits() const
+{
+    BigInt working = *this; // 13
+    std::vector<int> result;
+    BigInt remainder = working % 2; // Estraggo già il primo bit == resto //1
+
+    if (working.IsZero())
+    {
+        result.push_back(0);
+        return result;
+    }
+
+    while (working > 0)
+    {
+        remainder = working % 2;
+        working /= 2;
+        result.push_back(remainder.digits.at(0)); // Prendo quello in posizione 0 tanto varrà sempre e solo 0 o 1
+    }
+
+    return result;
+}
+
+std::vector<int> BigInt::ToTwosComplement(std::size_t width) const
+{
+    BigInt temp = *this;
+
+    if (temp.negative)
+    {
+        temp = -temp;
+    }
+
+    std::vector<int> result = temp.ToBits();
+    result.resize(width, 0);
+
+    if (!this->negative)
+    {
+        return result;
+    }
+
+    for (std::size_t i = 0; i < width; i++)
+    {
+        if (result[i] == 0)
+        {
+            result[i] = 1;
+        }
+        else
+        {
+            result[i] = 0;
+        }
+    }
+
+    this->AddOneToBits(result);
+    return result;
+}
+
+BigInt BigInt::FromTwosComplement(const std::vector<int> &bits)
+{
+    if (bits.back() == 0)
+    {
+        return FromBits(bits);
+    }
+
+    std::vector<int> magnitudeBits = bits;
+
+    for (std::size_t i = magnitudeBits.size(); i > 0; --i)
+    {
+        std::size_t index = i - 1;
+        if (magnitudeBits.at(index) == 0)
+        {
+            magnitudeBits.at(index) = 1;
+        }
+        else
+        {
+            magnitudeBits.at(index) = 0;
+        }
+    }
+    AddOneToBits(magnitudeBits);
+    return -FromBits(magnitudeBits);
+}
+
+void BigInt::AddOneToBits(std::vector<int> &bits)
+{
+    int one = 1;
+
+    for (std::size_t i = 0; i < bits.size(); i++)
+    {
+        if (bits.at(i) + one > 1)
+        {
+            bits.at(i) = 0;
+            one = 1;
+        }
+        else
+        {
+            bits.at(i) = bits.at(i) + one;
+            return;
+        }
+    }
 }
