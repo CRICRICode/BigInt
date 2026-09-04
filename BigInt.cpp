@@ -1,6 +1,8 @@
 #include "BigInt.h"
 #include <iostream>
 #include <stdexcept>
+#include <istream>
+#include <string>
 
 BigInt::BigInt()
 {
@@ -68,13 +70,13 @@ BigInt &BigInt::operator+=(const BigInt &other)
     if (this->negative != other.negative)
     {
         const BigInt::MagnitudeComparison leftComparison = this->CompareMagnitude(other);
-        if (leftComparison == MagnitudeComparison::LESSER)
+        if (leftComparison == MagnitudeComparison::Lesser)
         {
             BigInt temp = other;
             temp.SubtractMagnitude(*this);
             *this = temp;
         }
-        else if (leftComparison == MagnitudeComparison::EQUAL)
+        else if (leftComparison == MagnitudeComparison::Equal)
         {
             this->digits.clear();
             this->negative = false;
@@ -304,10 +306,16 @@ BigInt pow(const BigInt &base, BigInt exponent)
         throw std::invalid_argument("BigInt: input all'esponente non valido");
     }
     BigInt result = 1;
+    BigInt tempBase = base;
+
     while (exponent > 0)
     {
-        result *= base;
-        exponent--;
+        if (exponent % 2 != 0)
+        {
+            result *= tempBase;
+        }
+        tempBase *= tempBase;
+        exponent /= 2;
     }
     return result;
 }
@@ -331,11 +339,11 @@ bool BigInt::operator>(const BigInt &other) const
     }
     else
     {
-        if (this->negative == false && this->CompareMagnitude(other) == MagnitudeComparison::GREATER)
+        if (this->negative == false && this->CompareMagnitude(other) == MagnitudeComparison::Greater)
         {
             return true;
         }
-        if (this->negative == true && this->CompareMagnitude(other) == MagnitudeComparison::LESSER)
+        if (this->negative == true && this->CompareMagnitude(other) == MagnitudeComparison::Lesser)
         {
             return true;
         }
@@ -382,6 +390,46 @@ BigInt BigInt::operator<<(int count) const
     return result;
 }
 
+BigInt &BigInt::operator>>=(int count)
+{
+    if (count < 0)
+    {
+        throw std::invalid_argument("BigInt: input inserito non valido");
+    }
+    if (count == 0)
+    {
+        return *this;
+    }
+    for (int i = 0; i < count; i++)
+    {
+
+        const bool needsRoundDown = this->negative && ((*this % 2) != 0);
+
+        *this /= 2;
+
+        if (needsRoundDown)
+        {
+            *this -= 1;
+        }
+    }
+    return *this;
+}
+
+BigInt BigInt::operator>>(int count) const
+{
+    BigInt result = *this;
+    result >>= count;
+    return result;
+}
+
+BigInt BigInt::operator~() const
+{
+    BigInt result = *this;
+    result = -result;
+    result -= 1;
+    return result;
+}
+
 std::ostream &operator<<(std::ostream &out, const BigInt &value)
 {
     if (value.negative)
@@ -395,42 +443,61 @@ std::ostream &operator<<(std::ostream &out, const BigInt &value)
     return out;
 }
 
+std::istream& operator>>(std::istream& in, BigInt& value)
+{
+    std::string text;
+
+    if (!(in >> text))
+    {
+        return in;
+    }
+
+    try
+    {
+        BigInt parsed(text);
+        value = parsed;
+    }
+    catch (const std::invalid_argument&)
+    {
+        in.setstate(std::ios::failbit);
+    }
+
+    return in;
+}
+
 BigInt &BigInt::operator&=(const BigInt &other)
 {
-    BigInt leftPositive = *this;
-    if (leftPositive.negative)
-    {
-        leftPositive = -leftPositive;
-    }
-
-    BigInt rightPositive = other;
-    if (rightPositive.negative)
-    {
-        rightPositive = -rightPositive;
-    }
-
-    std::size_t leftBits = leftPositive.ToBits().size();
-    std::size_t rightBits = rightPositive.ToBits().size();
-    std::size_t maxSize = (leftBits > rightBits ? leftBits : rightBits) + 1;
-
-    std::vector<int> leftNumber = this->ToTwosComplement(maxSize);
-    std::vector<int> rightNumber = other.ToTwosComplement(maxSize);
-    std::vector<int> result(maxSize);
-
-
-    for (std::size_t i = 0; i < maxSize; i++)
-    {
-        result.at(i) = leftNumber.at(i) & rightNumber.at(i);
-    }
-
-    *this = FromTwosComplement(result);
-    return *this;
+    return ApplyBitwise(other, BitwiseOperation::And);
 }
 
 BigInt BigInt::operator&(const BigInt &other) const
 {
     BigInt result = *this;
     result &= other;
+    return result;
+}
+
+BigInt &BigInt::operator|=(const BigInt &other)
+{
+    return ApplyBitwise(other, BitwiseOperation::Or);
+}
+
+BigInt BigInt::operator|(const BigInt &other) const
+{
+    BigInt result = *this;
+    result |= other;
+    return result;
+}
+
+BigInt &BigInt::operator^=(const BigInt &other)
+{
+    return ApplyBitwise(other, BitwiseOperation::Xor);
+}
+
+BigInt BigInt::operator^(const BigInt &other) const
+{
+    BigInt result = *this;
+    result ^= other;
     return result;
 }
 
@@ -521,11 +588,11 @@ BigInt::MagnitudeComparison BigInt::CompareMagnitude(const BigInt &other) const
 {
     if (this->digits.size() < other.digits.size())
     {
-        return MagnitudeComparison::LESSER;
+        return MagnitudeComparison::Lesser;
     }
     else if (this->digits.size() > other.digits.size())
     {
-        return MagnitudeComparison::GREATER;
+        return MagnitudeComparison::Greater;
     }
 
     for (std::size_t i = this->digits.size(); i > 0; --i)
@@ -533,14 +600,64 @@ BigInt::MagnitudeComparison BigInt::CompareMagnitude(const BigInt &other) const
         std::size_t index = i - 1;
         if (this->digits.at(index) > other.digits.at(index))
         {
-            return MagnitudeComparison::GREATER;
+            return MagnitudeComparison::Greater;
         }
         else if (this->digits.at(index) < other.digits.at(index))
         {
-            return MagnitudeComparison::LESSER;
+            return MagnitudeComparison::Lesser;
         }
     }
-    return MagnitudeComparison::EQUAL;
+    return MagnitudeComparison::Equal;
+}
+
+BigInt &BigInt::ApplyBitwise(const BigInt &other, BitwiseOperation operation)
+{
+    BigInt leftPositive = *this;
+    if (leftPositive.negative)
+    {
+        leftPositive = -leftPositive;
+    }
+
+    BigInt rightPositive = other;
+    if (rightPositive.negative)
+    {
+        rightPositive = -rightPositive;
+    }
+
+    std::size_t leftBits = leftPositive.ToBits().size();
+    std::size_t rightBits = rightPositive.ToBits().size();
+    std::size_t maxSize = (leftBits > rightBits ? leftBits : rightBits) + 1;
+
+    std::vector<int> leftNumber = this->ToTwosComplement(maxSize);
+    std::vector<int> rightNumber = other.ToTwosComplement(maxSize);
+    std::vector<int> result(maxSize);
+
+    if (BitwiseOperation::And == operation)
+    {
+        for (std::size_t i = 0; i < maxSize; i++)
+        {
+            result.at(i) = leftNumber.at(i) & rightNumber.at(i);
+        }
+    }
+
+    if (BitwiseOperation::Or == operation)
+    {
+        for (std::size_t i = 0; i < maxSize; i++)
+        {
+            result.at(i) = leftNumber.at(i) | rightNumber.at(i);
+        }
+    }
+
+    if (BitwiseOperation::Xor == operation)
+    {
+        for (std::size_t i = 0; i < maxSize; i++)
+        {
+            result.at(i) = leftNumber.at(i) ^ rightNumber.at(i);
+        }
+    }
+
+    *this = FromTwosComplement(result);
+    return *this;
 }
 
 std::vector<int> BigInt::ToBits() const
