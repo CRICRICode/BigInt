@@ -273,14 +273,18 @@ int main()
     xorAssign ^= BigInt(6);
     ExpectEqual(xorAssign, BigInt(11), "operator^= mutates left operand");
 
-    //Istream
+    // Istream
     std::istringstream valid("-00023");
     BigInt value = 99;
     valid >> value;
+    ExpectEqual(value, BigInt(-23), "stream input parses and normalizes");
+    Check(!valid.fail(), "valid stream input does not set failbit");
 
     std::istringstream invalid("12a3");
     BigInt unchanged = 99;
     invalid >> unchanged;
+    ExpectEqual(unchanged, BigInt(99), "invalid stream input preserves destination");
+    Check(invalid.fail(), "invalid stream input sets failbit");
 
     if (failures == 0)
     {

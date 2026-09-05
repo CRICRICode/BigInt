@@ -2,7 +2,6 @@
 
 #include <string>
 #include <vector>
-#include <ostream>
 #include <iosfwd>
 
 class BigInt
@@ -46,20 +45,17 @@ public:
     BigInt operator>>(int count) const;
     BigInt operator~() const;
 
-
-
     BigInt &operator&=(const BigInt &other);
     BigInt operator&(const BigInt &other) const;
-    
+
     BigInt &operator|=(const BigInt &other);
     BigInt operator|(const BigInt &other) const;
-    
+
     BigInt &operator^=(const BigInt &other);
     BigInt operator^(const BigInt &other) const;
 
-    void Print() const;
     friend std::ostream &operator<<(std::ostream &out, const BigInt &value);
-    friend std::istream& operator>>(std::istream& in, BigInt& value);
+    friend std::istream &operator>>(std::istream &in, BigInt &value);
 
 private:
     std::vector<int> digits;
