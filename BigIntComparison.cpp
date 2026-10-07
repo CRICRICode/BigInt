@@ -2,43 +2,43 @@
 
 // Comparisons use the sign first, then the magnitude when necessary.
 
-bool BigInt::operator==(const BigInt &other) const
+bool operator==(const BigInt &left, const BigInt &right)
 {
-    return this->digits == other.digits &&
-           this->negative == other.negative;
+    return left.digits == right.digits &&
+           left.negative == right.negative;
 }
 
-bool BigInt::operator!=(const BigInt &other) const
+bool operator!=(const BigInt &left, const BigInt &right)
 {
-    return !(*this == other);
+    return !(left == right);
 }
 
-bool BigInt::operator>(const BigInt &other) const
+bool operator>(const BigInt &left, const BigInt &right)
 {
-    if (this->negative != other.negative)
+    if (left.negative != right.negative)
     {
-        return !this->negative;
+        return !left.negative;
     }
 
-    if (!this->negative)
+    if (!left.negative)
     {
-        return this->CompareMagnitude(other) == MagnitudeComparison::Greater;
+        return left.CompareMagnitude(right) == BigInt::MagnitudeComparison::Greater;
     }
 
-    return this->CompareMagnitude(other) == MagnitudeComparison::Lesser;
+    return left.CompareMagnitude(right) == BigInt::MagnitudeComparison::Lesser;
 }
 
-bool BigInt::operator>=(const BigInt &other) const
+bool operator>=(const BigInt &left, const BigInt &right)
 {
-    return !(other > *this);
+    return !(right > left);
 }
 
-bool BigInt::operator<(const BigInt &other) const
+bool operator<(const BigInt &left, const BigInt &right)
 {
-    return other > *this;
+    return right > left;
 }
 
-bool BigInt::operator<=(const BigInt &other) const
+bool operator<=(const BigInt &left, const BigInt &right)
 {
-    return !(*this > other);
+    return !(left > right);
 }

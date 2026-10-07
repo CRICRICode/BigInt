@@ -65,11 +65,10 @@ BigInt &BigInt::operator+=(const BigInt &other)
     return *this;
 }
 
-BigInt BigInt::operator+(const BigInt &other) const
+BigInt operator+(BigInt left, const BigInt &right)
 {
-    BigInt result = *this;
-    result += other;
-    return result;
+    left += right;
+    return left;
 }
 
 BigInt &BigInt::operator++()
@@ -90,11 +89,10 @@ BigInt &BigInt::operator-=(const BigInt &other)
     return *this;
 }
 
-BigInt BigInt::operator-(const BigInt &other) const
+BigInt operator-(BigInt left, const BigInt &right)
 {
-    BigInt result = *this;
-    result -= other;
-    return result;
+    left -= right;
+    return left;
 }
 
 BigInt BigInt::operator-() const
@@ -149,11 +147,10 @@ BigInt &BigInt::operator*=(const BigInt &other)
     return *this;
 }
 
-BigInt BigInt::operator*(const BigInt &other) const
+BigInt operator*(BigInt left, const BigInt &right)
 {
-    BigInt result = *this;
-    result *= other;
-    return result;
+    left *= right;
+    return left;
 }
 
 BigInt &BigInt::operator/=(const BigInt &other)
@@ -196,11 +193,10 @@ BigInt &BigInt::operator/=(const BigInt &other)
     return *this;
 }
 
-BigInt BigInt::operator/(const BigInt &other) const
+BigInt operator/(BigInt left, const BigInt &right)
 {
-    BigInt result = *this;
-    result /= other;
-    return result;
+    left /= right;
+    return left;
 }
 
 BigInt &BigInt::operator%=(const BigInt &other)
@@ -211,11 +207,10 @@ BigInt &BigInt::operator%=(const BigInt &other)
     return *this;
 }
 
-BigInt BigInt::operator%(const BigInt &other) const
+BigInt operator%(BigInt left, const BigInt &right)
 {
-    BigInt result = *this;
-    result %= other;
-    return result;
+    left %= right;
+    return left;
 }
 
 BigInt pow(const BigInt &base, int exponent)

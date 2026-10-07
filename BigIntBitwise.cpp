@@ -66,11 +66,10 @@ BigInt &BigInt::operator&=(const BigInt &other)
     return ApplyBitwise(other, BitwiseOperation::And);
 }
 
-BigInt BigInt::operator&(const BigInt &other) const
+BigInt operator&(BigInt left, const BigInt &right)
 {
-    BigInt result = *this;
-    result &= other;
-    return result;
+    left &= right;
+    return left;
 }
 
 BigInt &BigInt::operator|=(const BigInt &other)
@@ -78,11 +77,10 @@ BigInt &BigInt::operator|=(const BigInt &other)
     return ApplyBitwise(other, BitwiseOperation::Or);
 }
 
-BigInt BigInt::operator|(const BigInt &other) const
+BigInt operator|(BigInt left, const BigInt &right)
 {
-    BigInt result = *this;
-    result |= other;
-    return result;
+    left |= right;
+    return left;
 }
 
 BigInt &BigInt::operator^=(const BigInt &other)
@@ -90,11 +88,10 @@ BigInt &BigInt::operator^=(const BigInt &other)
     return ApplyBitwise(other, BitwiseOperation::Xor);
 }
 
-BigInt BigInt::operator^(const BigInt &other) const
+BigInt operator^(BigInt left, const BigInt &right)
 {
-    BigInt result = *this;
-    result ^= other;
-    return result;
+    left ^= right;
+    return left;
 }
 
 BigInt &BigInt::ApplyBitwise(const BigInt &other, BitwiseOperation operation)

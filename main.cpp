@@ -59,6 +59,22 @@ int main()
         BigInt(std::numeric_limits<int>::min()),
         BigInt(std::to_string(std::numeric_limits<int>::min())),
         "INT_MIN constructor");
+    ExpectEqual(
+        BigInt(std::numeric_limits<long long>::min()),
+        BigInt(std::to_string(std::numeric_limits<long long>::min())),
+        "LLONG_MIN constructor");
+    ExpectEqual(
+        BigInt(std::numeric_limits<unsigned int>::max()),
+        BigInt(std::to_string(std::numeric_limits<unsigned int>::max())),
+        "UINT_MAX constructor");
+    ExpectEqual(
+        BigInt(std::numeric_limits<unsigned long>::max()),
+        BigInt(std::to_string(std::numeric_limits<unsigned long>::max())),
+        "ULONG_MAX constructor");
+    ExpectEqual(
+        BigInt(std::numeric_limits<unsigned long long>::max()),
+        BigInt(std::to_string(std::numeric_limits<unsigned long long>::max())),
+        "ULLONG_MAX constructor");
 
     ExpectInvalidArgument([]
                           { BigInt(""); }, "empty string throws");
@@ -76,6 +92,11 @@ int main()
     ExpectEqual(BigInt(23) - BigInt(-50), BigInt(73), "subtract negative");
     ExpectEqual(BigInt(-23) - BigInt(-5), BigInt(-18), "negative subtraction");
     ExpectEqual(BigInt(23) - BigInt(23), BigInt(0), "subtraction produces canonical zero");
+    ExpectEqual(5 + BigInt(7), BigInt(12), "int plus BigInt");
+    ExpectEqual(5 - BigInt(7), BigInt(-2), "int minus BigInt preserves operand order");
+    ExpectEqual(std::numeric_limits<unsigned int>::max() + BigInt(1),
+                BigInt(std::to_string(std::numeric_limits<unsigned int>::max())) + 1,
+                "large unsigned left operand does not narrow");
 
     BigInt addSelf = 17;
     addSelf += addSelf;
@@ -85,6 +106,7 @@ int main()
     ExpectEqual(BigInt(385) * BigInt(892), BigInt(343420), "multi-digit multiplication");
     ExpectEqual(BigInt(-23) * BigInt(45), BigInt(-1035), "negative multiplication");
     ExpectEqual(BigInt(0) * BigInt(-999), BigInt(0), "multiplication by zero");
+    ExpectEqual(5 * BigInt(-7), BigInt(-35), "int times BigInt");
 
     // Division and modulo: division truncates toward zero
     ExpectEqual(BigInt(123) / BigInt(10), BigInt(12), "positive division");
@@ -96,6 +118,8 @@ int main()
     ExpectEqual(BigInt(-23) % BigInt(5), BigInt(-3), "negative dividend modulo");
     ExpectEqual(BigInt(23) % BigInt(-5), BigInt(3), "negative divisor modulo");
     ExpectEqual(BigInt(-23) % BigInt(-5), BigInt(-3), "both negative modulo");
+    ExpectEqual(25 / BigInt(4), BigInt(6), "int divided by BigInt");
+    ExpectEqual(25 % BigInt(4), BigInt(1), "int modulo BigInt");
 
     ExpectInvalidArgument(
         []
@@ -147,6 +171,9 @@ int main()
     Check(BigInt(-3) > BigInt(-5), "negative comparison reverses magnitude");
     Check(BigInt(5) >= BigInt(5), "greater or equal equality");
     Check(BigInt(-5) <= BigInt(-5), "less or equal equality");
+    Check(5 == BigInt(5) && 5 != BigInt(6), "int left equality comparisons");
+    Check(5 < BigInt(6) && 5 <= BigInt(5), "int left lower comparisons");
+    Check(5 > BigInt(4) && 5 >= BigInt(5), "int left greater comparisons");
 
     // Shifts
     ExpectEqual(BigInt(5) << 3, BigInt(40), "left shift");
@@ -180,6 +207,9 @@ int main()
     ExpectEqual(BigInt(-3) & BigInt(-5), BigInt(-7), "signed bitwise and");
     ExpectEqual(BigInt(-3) | BigInt(-5), BigInt(-1), "signed bitwise or");
     ExpectEqual(BigInt(-3) ^ BigInt(-5), BigInt(6), "signed bitwise xor");
+    ExpectEqual(5 & BigInt(3), BigInt(1), "int left bitwise and");
+    ExpectEqual(5 | BigInt(2), BigInt(7), "int left bitwise or");
+    ExpectEqual(5 ^ BigInt(3), BigInt(6), "int left bitwise xor");
 
     // Value semantics: binary operators must not mutate their left operand
     BigInt original = 13;
@@ -201,6 +231,22 @@ int main()
     BigInt moveSource = 456;
     BigInt moved = std::move(moveSource);
     ExpectEqual(moved, BigInt(456), "move destination preserves value");
+    ExpectEqual(moveSource, BigInt(0), "move construction leaves source at canonical zero");
+    moveSource += 2;
+    ExpectEqual(moveSource, BigInt(2), "moved-from source can be reused");
+
+    BigInt moveAssignmentSource = -789;
+    BigInt moveAssignmentTarget = 123;
+    moveAssignmentTarget = std::move(moveAssignmentSource);
+    ExpectEqual(moveAssignmentTarget, BigInt(-789), "move assignment transfers value");
+    ExpectEqual(moveAssignmentSource, BigInt(0), "move assignment leaves source at canonical zero");
+    moveAssignmentSource = 4;
+    ExpectEqual(moveAssignmentSource, BigInt(4), "move-assignment source can be reused");
+
+    BigInt selfMove = 33;
+    BigInt *selfMoveAlias = &selfMove;
+    selfMove = std::move(*selfMoveAlias);
+    ExpectEqual(selfMove, BigInt(33), "self move assignment preserves value");
 
     BigInt notOriginal = 5;
     BigInt notResult = ~notOriginal;

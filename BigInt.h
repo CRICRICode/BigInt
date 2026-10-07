@@ -9,35 +9,44 @@ class BigInt
 public:
     BigInt();
     BigInt(int value);
+    BigInt(long value);
+    BigInt(long long value);
+    BigInt(unsigned int value);
+    BigInt(unsigned long value);
+    BigInt(unsigned long long value);
     explicit BigInt(const std::string &text);
+    BigInt(const BigInt &) = default;
+    BigInt &operator=(const BigInt &) = default;
+    BigInt(BigInt &&other);
+    BigInt &operator=(BigInt &&other);
 
     BigInt &operator+=(const BigInt &other);
-    BigInt operator+(const BigInt &other) const;
+    friend BigInt operator+(BigInt left, const BigInt &right);
     BigInt &operator++();
     BigInt operator++(int);
 
     BigInt &operator-=(const BigInt &other);
-    BigInt operator-(const BigInt &other) const;
+    friend BigInt operator-(BigInt left, const BigInt &right);
     BigInt operator-() const;
     BigInt &operator--();
     BigInt operator--(int);
 
     BigInt &operator*=(const BigInt &other);
-    BigInt operator*(const BigInt &other) const;
+    friend BigInt operator*(BigInt left, const BigInt &right);
 
     BigInt &operator/=(const BigInt &other);
-    BigInt operator/(const BigInt &other) const;
+    friend BigInt operator/(BigInt left, const BigInt &right);
 
     BigInt &operator%=(const BigInt &other);
-    BigInt operator%(const BigInt &other) const;
+    friend BigInt operator%(BigInt left, const BigInt &right);
 
-    bool operator==(const BigInt &other) const;
-    bool operator!=(const BigInt &other) const;
+    friend bool operator==(const BigInt &left, const BigInt &right);
+    friend bool operator!=(const BigInt &left, const BigInt &right);
 
-    bool operator>(const BigInt &other) const;
-    bool operator>=(const BigInt &other) const;
-    bool operator<(const BigInt &other) const;
-    bool operator<=(const BigInt &other) const;
+    friend bool operator>(const BigInt &left, const BigInt &right);
+    friend bool operator>=(const BigInt &left, const BigInt &right);
+    friend bool operator<(const BigInt &left, const BigInt &right);
+    friend bool operator<=(const BigInt &left, const BigInt &right);
 
     BigInt &operator<<=(int count);
     BigInt operator<<(int count) const;
@@ -46,13 +55,13 @@ public:
     BigInt operator~() const;
 
     BigInt &operator&=(const BigInt &other);
-    BigInt operator&(const BigInt &other) const;
+    friend BigInt operator&(BigInt left, const BigInt &right);
 
     BigInt &operator|=(const BigInt &other);
-    BigInt operator|(const BigInt &other) const;
+    friend BigInt operator|(BigInt left, const BigInt &right);
 
     BigInt &operator^=(const BigInt &other);
-    BigInt operator^(const BigInt &other) const;
+    friend BigInt operator^(BigInt left, const BigInt &right);
 
     friend std::ostream &operator<<(std::ostream &out, const BigInt &value);
     friend std::istream &operator>>(std::istream &in, BigInt &value);

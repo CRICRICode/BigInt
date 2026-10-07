@@ -1,6 +1,7 @@
 #include "BigInt.h"
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 // Core representation, construction and invariant maintenance.
 
@@ -10,7 +11,11 @@ BigInt::BigInt()
     this->negative = false;
 }
 
-BigInt::BigInt(int value)
+BigInt::BigInt(int value) : BigInt(static_cast<long long>(value)) {}
+
+BigInt::BigInt(long value) : BigInt(static_cast<long long>(value)) {}
+
+BigInt::BigInt(long long value)
 {
     this->negative = value < 0;
 
@@ -26,6 +31,39 @@ BigInt::BigInt(int value)
         this->digits.push_back(singleValue);
         value = value / 10;
     } while (value != 0);
+}
+
+BigInt::BigInt(unsigned int value) : BigInt(static_cast<unsigned long long>(value)) {}
+
+BigInt::BigInt(unsigned long value) : BigInt(static_cast<unsigned long long>(value)) {}
+
+BigInt::BigInt(unsigned long long value)
+{
+    this->negative = false;
+
+    do
+    {
+        this->digits.push_back(static_cast<int>(value % 10));
+        value /= 10;
+    } while (value != 0);
+}
+
+BigInt::BigInt(BigInt &&other) : BigInt()
+{
+    this->digits.swap(other.digits);
+    this->negative = other.negative;
+    other.negative = false;
+}
+
+BigInt &BigInt::operator=(BigInt &&other)
+{
+    if (this != &other)
+    {
+        BigInt moved(std::move(other));
+        this->digits.swap(moved.digits);
+        this->negative = moved.negative;
+    }
+    return *this;
 }
 
 BigInt::BigInt(const std::string &text)
